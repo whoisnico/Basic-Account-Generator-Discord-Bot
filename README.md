@@ -1,4 +1,4 @@
-# Venady Bot
+# Account Generator Bot
 
 Example Code from [Venady Server Bot](https://discord.gg/venady)
 
