@@ -60,7 +60,7 @@ async def on_ready():
     await venady.change_presence(
         activity=disnake.Activity(
             type=disnake.ActivityType.playing,
-            name=f'*by gg/venady | -help'),
+            name=f'*by gg/venady | {prefix}help'),
             status=disnake.Status.online)
 
 
