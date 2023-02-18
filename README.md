@@ -24,13 +24,13 @@ Example Code from [Venady Server Bot](https://discord.gg/venady)
 
 ## FAQ
 
-#### Can i change the accounts types?
+#### How can i add accounts?
 
-Thats not a problem for the generator command! You have only to change the files in the Stock Command.
+Just create a .txt file in the folder "Accounts" and add in the file your accounts
 
-#### The generator dont work after a restock?
+#### Do you have to add stock or smth when you add new accounts in the src?
 
-If this happen you have to remake all txt files.
+Nope all will be work without touching the code!
 
 # ToDo
 
