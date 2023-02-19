@@ -32,7 +32,7 @@ print("Bot is starting...")
 
 time.sleep(1) #just fun cooldown lol
 
-with open("config2.json") as file:
+with open("config.json") as file:
     config = json.load(file)
     token = config["token"]
     prefix = config["prefix"]
