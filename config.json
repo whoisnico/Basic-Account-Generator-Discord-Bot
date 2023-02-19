@@ -2,7 +2,7 @@
 
     "token":"YOURTOKEN",
     "prefix":"YOURPREFIX",
-    "cmd_channel": CHANNELID
+    "cmd_channel": YOURCHANNELID
 
 }
 
