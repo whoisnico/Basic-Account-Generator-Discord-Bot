@@ -1,8 +1,7 @@
 {
 
-    "token":"YOURTOKEN",
-    "prefix":"YOURPREFIX",
-    "cmd_channel": YOURCHANNELID
-
+    "token":"YOURBOTTOKEN",
+    "cmd_channel": YOURCHANNELID,
+    "cooldown": CooldownNumberInsSeconds
 }
 

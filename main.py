@@ -7,6 +7,9 @@ import disnake,json,os,random
 from disnake.ext import commands
 
 
+
+
+
 credits = """
 
  /$$    /$$                                    /$$          
@@ -27,7 +30,6 @@ Discord - discord.gg/venady
 """
 
 print(credits)
-time.sleep(1) #just fun cooldown lol
 print("Bot is starting...")
 
 time.sleep(1) #just fun cooldown lol
@@ -35,12 +37,12 @@ time.sleep(1) #just fun cooldown lol
 with open("config.json") as file:
     config = json.load(file)
     token = config["token"]
-    prefix = config["prefix"]
+    cooldown = config["cooldown"]
     cmd_channel = config["cmd_channel"]
 
 print("-> Config loaded")
 
-
+prefix = "-"
 clientIntents = disnake.Intents.default()
 clientIntents.message_content = True
 clientIntents.members = True
@@ -60,73 +62,64 @@ async def on_ready():
     await venady.change_presence(
         activity=disnake.Activity(
             type=disnake.ActivityType.playing,
-            name=f'*by gg/venady | {prefix}help'),
+            name=f'*by gg/venady & nico| /help'),
             status=disnake.Status.online)
 
 
-@venady.event
-async def on_command_error(ctx, error): #Global Cooldown for free Generator
-    if isinstance(error, commands.CommandOnCooldown):
-        remaining = round(error.retry_after)
-        await ctx.message.reply(f"Server Global Cooldown! Please try again in {remaining}s")
 
 #----------------------------------------Generator Commands----------------------------------------
-@venady.command() #free command
-@commands.cooldown(1, 5, commands.BucketType.guild)
-async def gen(ctx, stock=None):
-    server_name = ctx.guild.name
-    if ctx.channel != cmd_channel:
-        if stock == None:
-            await ctx.message.reply(f"Use `{prefix}gen [account type]`")
-            print(f"{ctx.author.name} used (free) -> Error [No Account Type]")
-        else:
-            stock = stock.lower()+".txt" 
-            if stock not in os.listdir(f"Accounts//"): 
-                await ctx.message.reply(f"Account does not exist. `{prefix}stock`")
-                print(f"{ctx.author.account} used (free {stock}) -> Error [No Exist Account Type]".replace(".txt",""))
-            else:
-                with open(f"Accounts//"+stock) as file:
-                    lines = file.read().splitlines()
-                if len(lines) == 0: 
-                    await ctx.send("These accounts are out of stock") 
-                    print(f"{ctx.author.name} used (free {stock}) -> Error [No Account Type Stock]".replace(".txt",""))
-                else:
-                    with open(f"Accounts//"+stock) as file:
-                            account = random.choice(lines)
-                    try:
-                        em = disnake.Embed(title = " ", description = f"*This is your generated account* \n `{str(account)}` \n *The Order is Username:Password*", color = 0xFFFFFF, timestamp= ctx.message.created_at)
-                        em.set_footer(text = f"{server_name}")
-                        em.set_author(icon_url = "https://media.discordapp.net/attachments/1007664686679986186/1028340335732076634/venady_logo.png?width=676&height=676", name = f"{server_name} Account Generator")
+@venady.slash_command()
+@commands.cooldown(1, cooldown, commands.BucketType.member)
+async def gen(inter, stock):
+    user = inter.author
+    server_name = inter.guild.name
+    if inter.channel.id != cmd_channel:
+        await inter.send(f"Wrong Channel! Use <#{cmd_channel}>")
+        print(f"{inter.author.name} used (free {stock}) -> Error [Wrong Channel]".replace(".txt",""))
+        return
+    stock = stock.lower() + ".txt"
+    if stock not in os.listdir(f"Accounts//"):
+        await inter.send(f"Account does not exist. `{prefix}stock`")
+        print(f"{inter.author.name} used (free {stock}) -> Error [No Exist Account Type]".replace(".txt",""))
+        return
+    with open(f"Accounts//"+stock) as file:
+        lines = file.read().splitlines()
+        if len(lines) == 0:
+            await inter.send("These accounts are out of stock")
+            print(f"{inter.author.name} used (free {stock}) -> Error [No Account Type Stock]".replace(".txt",""))
+            return
+    with open(f"Accounts//"+stock) as file:
+        account = random.choice(lines)
+    em = disnake.Embed(title = " ", description = f"*This is your generated account* \n `{str(account)}` \n *The Order is Username:Password*", color = 0xFFFFFF, timestamp= datetime.datetime.utcnow())
+    em.set_footer(text = f"{server_name}")
+    em.set_author(icon_url = "https://media.discordapp.net/attachments/1007664686679986186/1028340335732076634/venady_logo.png?width=676&height=676", name = f"{server_name} Account Generator")
+    await user.send(embed=em)
+    print(f"{inter.author.name} used (gen {stock}) -> Successful | {server_name}".replace(".txt",""))
 
-                        delay = [
-                                1,
-                                6,
-                                9,
-                                10,
-                                5,
-                                3
-                        ]
-                        time.sleep(random.choice(delay))
-                        await ctx.author.send(embed=em)
-                        print(f"{ctx.author.name} used (gen {stock}) -> Successful | {server_name}".replace(".txt",""))
-                    except: 
-                        await ctx.message.reply("Failed to send! Turn on ur direct messages")
-                        print(f"{ctx.author.name} used (free {stock}) -> Error [Failed Sending / DMS OFF]".replace(".txt",""))
-                    else: 
-                        await ctx.message.reply("Sent the account to your DMS!")
-                        with open(f"Accounts//"+stock,"w") as file:
-                            file.write("") #Clear the file
-                        with open(f"Accounts//"+stock,"a") as file:
-                            for line in lines:
-                                if line != account: 
-                                    file.write(line+"\n") 
-    else:
-        await ctx.message.reply(f"Wrong Channel! Use <#{cmd_channel}>")
-        print(f"{ctx.author.name} used (free {stock}) -> Error [Wrong Channel]".replace(".txt",""))
+    await inter.send("Sent the account to your DMS!")
+    with open("Accounts//" + stock, "w", encoding='utf-8') as file:
+        file.write("")  # Leeren der Datei
+    with open("Accounts//" + stock, "a", encoding='utf-8') as file:
+        for line in lines:
+            if line != account:
+                file.write(line + "\n")
+
+                
+@gen.error
+async def gen_error(inter: disnake.ApplicationCommandInteraction, error: Exception) -> None:
+    if isinstance(error, commands.CommandOnCooldown):
+        retry_after = disnake.utils.format_dt(
+            disnake.utils.utcnow() + datetime.timedelta(seconds=error.retry_after), "R"
+        )
+        return await inter.response.send_message(
+            f"This command is on cooldown, retry {retry_after}",
+            ephemeral=True
+        )
+
+    raise error
 
 
-
-@venady.command() # Stock command
+@venady.slash_command() # Stock command
 async def stock(inter:disnake.ApplicationCommandInteraction):
     """show you the server stock"""
     id = inter.guild.id
@@ -142,10 +135,10 @@ async def stock(inter:disnake.ApplicationCommandInteraction):
     await inter.send(embed=stockmenu)
 
 #---------------------------------------- Mod Commands----------------------------------------
-@venady.command() #help command
-async def help(ctx):
+@venady.slash_command() #help command
+async def help(inter):
     """show you all commands."""
-    server_name = ctx.guild.name
+    server_name = inter.guild.name
     help = disnake.Embed(title="Venady Help",description=f" ", color = 0xffffff, timestamp=datetime.datetime.utcnow())
     help.set_footer(text =f"{server_name}", icon_url="https://media.discordapp.net/attachments/1007664686679986186/1028340335732076634/venady_logo.png?width=676&height=676")
 
@@ -172,14 +165,14 @@ async def help(ctx):
     > Show you this Message!
     """)
 
-    await ctx.send(embed=help, view=view)
-    print(f"{ctx.author.name} used (help) -> Successfull")
+    await inter.send(embed=help, view=view)
+    print(f"{inter.author.name} used (help) -> Successfull")
 
 
-@venady.command() #invite command
-async def invite(ctx):
+@venady.slash_command() #invite command
+async def invite(inter):
 
-    await ctx.message.reply("Server Invite: https://discord.gg/venady \n Bot invite: https://bit.ly/3WlC3Er \n Sourcecode: https://github.com/nicotrixxel")
+    await inter.message.reply("Server Invite: https://discord.gg/venady \n Bot invite: https://bit.ly/3WlC3Er \n Sourcecode: https://github.com/nicotrixxel")
     
 
 

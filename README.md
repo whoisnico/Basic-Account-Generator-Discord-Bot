@@ -17,7 +17,7 @@ Example Code from [Venady Server Bot](https://discord.gg/venady)
  ```bash
   pip install disnake
   ```
-- setup the config file
+- setup the config file (Just put a number in seconds on cooldown!)
 - start main.py
 
 
@@ -41,6 +41,8 @@ Nope all will be work without touching the code!
 
 ### Completed Taks ✓
 - [x]  Basic Generator Commands
+- [x]  Slash Commands
+
 ## Links
 
  - [Disnake API](https://docs.disnake.dev/en/stable/#)

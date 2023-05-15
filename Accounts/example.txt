@@ -1,1 +1,2 @@
-user:pass
+accountline1
+accountline2
