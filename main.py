@@ -62,7 +62,7 @@ async def on_ready():
     await venady.change_presence(
         activity=disnake.Activity(
             type=disnake.ActivityType.playing,
-            name=f'*by gg/venady & nico| /help'),
+            name=f'*by @whosnico & gg/venady| /help'),
             status=disnake.Status.online)
 
 
@@ -135,6 +135,41 @@ async def stock(inter:disnake.ApplicationCommandInteraction):
     await inter.send(embed=stockmenu)
 
 #---------------------------------------- Mod Commands----------------------------------------
+@venady.slash_command()
+@commands.has_permissions(administrator=True)
+async def create_stock(inter:disnake.ApplicationCommandInteraction, stock: disnake.Attachment):
+    """Add stock to the generator"""
+
+    if not "text/plain" in stock.content_type:
+        await inter.send("Please use a text file!", ephemeral=True)
+        return
+    
+
+    stock_bytes = await stock.read()
+    stock_lines = stock_bytes.decode(stock.content_type.partition("charset=")[2]).splitlines()
+    if len(stock_lines) > 5000:
+        await inter.send("This combo have to many lines!", ephemeral=True)
+        return
+    await stock.save(f"Accounts/{stock.filename}")
+    await inter.send(f"{stock.filename.partition('.')[0]} added to the generator")
+    return
+
+@venady.slash_command()
+@commands.has_permissions(administrator=True)
+async def delete_stock(inter: disnake.ApplicationCommandInteraction, stock):
+    """remove stock from generator"""
+    stock = stock.lower()+".txt" 
+    path = f"Accounts"
+    files = os.listdir(path)
+    if not stock in files:
+        await inter.send("Stock doesnt exist!", ephemeral=True)
+        return
+    os.remove(os.path.join(path, stock))
+    name = stock.lower().replace(".txt","")
+    await inter.send(f"{name} got deleted")
+    
+        
+
 @venady.slash_command() #help command
 async def help(inter):
     """show you all commands."""
@@ -152,8 +187,9 @@ async def help(inter):
 
 
 
+
 #--------------------------------------------------------------------------------1 Help Menu
-    help.add_field(name="Generators Commands", value=f"""> `{prefix}gen`
+    help.add_field(name="Generators Commands", value=f"""> `/gen`
     > Use this to generate!
 
 
